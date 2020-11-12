@@ -56,7 +56,9 @@ def randomize(ipclasses, smmin, smmax, cidrmin, check1, check2, check3, entryip,
 #getanalyse erhält die gui elemente in denen der nutzer ip, cidr und subnetzmaske generiert hat
 #und ruft mit diesen werten die methode analyzeGUI auf
 #analyzeGUI gibt eine liste mit werten zurück die benutzt wird um das gui element frameAnalysis zu befüllen
-def getanalyse(entryip,entrysm,entrycidr,frameAnalysis):
+def getanalyse(entryip,entrysm,entrycidr,frameAnalysis,frameTest):
+    for x in frameAnalysis.grid_slaves():
+        x.grid_forget()
     #werte aus den guielementen holen
     ip=entryip.get()
     subnetzmaske=entrysm.get()
@@ -85,19 +87,108 @@ def getanalyse(entryip,entrysm,entrycidr,frameAnalysis):
     #17 Inhalt Hosts insgesamt
 
     #leeres label als platzhalter
-    Label(master=frameAnalysis, text='', anchor='w', width="24").grid(row=0,column=0)
+    Label(master=frameAnalysis, text='', anchor='w', width="32").grid(row=0,column=0)
 
     #durchläuft alle elemente der resultlist, startend bei row=1 column=0, row=1 column=1, row=2 column=0, usw. werden die elemente in labels eingepflegt
     for index, x in enumerate(resultlist, start=0):
             #column=index%2, column ist abwechselnd 0 und 1 
             #row=index-index%2+1
-            Label(master=frameAnalysis, text=x, anchor='w', width="24").grid(row=index-index%2+1,column=index%2)
+            Label(master=frameAnalysis, text=x, anchor='w', width=str(32+10*index%2)).grid(row=index-index%2+1,column=index%2)
     #und frameanalysis anschließend generiert
+    frameTest.pack_forget()
     frameAnalysis.pack(fill=BOTH)
     return  
 
+def gettest(entryip,entrysm,entrycidr,frameTest,frameAnalysis):
+    for x in frameTest.grid_slaves():
+        x.grid_forget()
+    #werte aus den guielementen holen
+    ip=entryip.get()
+    subnetzmaske=entrysm.get()
+    cidr =int(entrycidr.get())
+    #methodenaufruf duh
+    resultlist = analyzeGUI(ip,subnetzmaske,cidr)
+    #resultliste enthält:
+    #[0] bis [17] in dieser Reihenfolge: 
+    #0 Titel "Netzwerkteil"
+    #1 Inhalt Netzwerkteil
+    #2 Titel "Subnetzteil"
+    #3 Inhalt Subnetzteil
+    #4 Titel "Hostteil"
+    #5 Inhalt Hostteil
+    #6 Titel "Netzwerk-ID"
+    #7 Inhalt Netzwerk-ID
+    #8 Titel "Broadcast-ID"
+    #9 Inhalt Broadcast-ID
+    #10 Titel "Nummer des Subnetzes:"
+    #11 Inhalt Nummer des Subnetz + "-tes Subnetz"
+    #12 Titel "Anzahl Subnetze"
+    #13 Inhalt Anzahl Subnetze
+    #14 Titel "Anzahl Hosts"
+    #15 Inhalt Anzahl Hosts
+    #16 Titel "Hosts insgesamt"
+    #17 Inhalt Hosts insgesamt
+
+    #leeres label als platzhalter
+    Label(master=frameTest, text='', anchor='w', width="32").grid(row=0,column=0)
+
+    #durchläuft alle elemente der resultlist, startend bei row=1 column=0, row=1 column=1, row=2 column=0, usw. werden die elemente in labels eingepflegt
+    for index, x in enumerate(resultlist, start=0):
+            #column=index%2, column ist abwechselnd 0 und 1 
+            #row=index-index%2+1
+            if index%2==0:Label(master=frameTest, text=x, anchor='w', width="32").grid(row=index-index%2+1,column=index%2)
+            else:
+                 temp = Entry(master=frameTest, width="42")
+                 temp.grid(row=index-index%2+1,column=index%2)
+    #und frameanalysis anschließend generiert
+    
+    frameAnalysis.pack_forget()
+    frameTest.pack(fill=BOTH)
+    return 
+
+def getcheck(entryip,entrysm,entrycidr,frameAnalysis,frameTest):
+    #werte aus den guielementen holen
+    ip=entryip.get()
+    subnetzmaske=entrysm.get()
+    cidr =int(entrycidr.get())
+    #methodenaufruf duh
+    resultlist = analyzeGUI(ip,subnetzmaske,cidr)
+    #resultliste enthält:
+    #[0] bis [17] in dieser Reihenfolge: 
+    #0 Titel "Netzwerkteil"
+    #1 Inhalt Netzwerkteil
+    #2 Titel "Subnetzteil"
+    #3 Inhalt Subnetzteil
+    #4 Titel "Hostteil"
+    #5 Inhalt Hostteil
+    #6 Titel "Netzwerk-ID"
+    #7 Inhalt Netzwerk-ID
+    #8 Titel "Broadcast-ID"
+    #9 Inhalt Broadcast-ID
+    #10 Titel "Nummer des Subnetzes:"
+    #11 Inhalt Nummer des Subnetz + "-tes Subnetz"
+    #12 Titel "Anzahl Subnetze"
+    #13 Inhalt Anzahl Subnetze
+    #14 Titel "Anzahl Hosts"
+    #15 Inhalt Anzahl Hosts
+    #16 Titel "Hosts insgesamt"
+    #17 Inhalt Hosts insgesamt
+    entrylist = [x for index, x in enumerate(frameTest.grid_slaves()) if type(x) is Entry]
+    entrylist.reverse()
+    resultlist = [x for index, x in enumerate(resultlist) if index%2==1]
+    #print(entrylist)
+    #print(resultlist)
+    for index, x in enumerate(entrylist):
+        if x.get()==resultlist[index]:
+            x.configure(bg="green")
+        else:
+            x.configure(bg="red")
+
+    return
+
 
 def main():
+
     
     #Zufällige Eingabe
     
@@ -126,12 +217,11 @@ def main():
     window = Tk()
     window.title("Subnetting Tool By Marco Meyer")
     window.resizable(height = False, width = False)
-
     frameTop = Frame()
     frameMiddle = Frame()
     frameBottom = Frame()
     frameAnalysis = Frame()
-
+    frameTest = Frame()
     #frameTop sind die Anzeigen der IP / Cidr und Subnetzmaske
     
     Label(master=frameTop, text="IP / CIDR:", anchor='w', width="12").grid(row=0, column=0)
@@ -191,15 +281,23 @@ def main():
     frameMiddle.pack()
     
     #frameBottom sind die 2 Knöpfe
-
+    
     randomize2 = partial(randomize, ipclass, smmin, smmax, cidrmin, check1, check2, check3, entryip, entrysm, entrycidr)
     genButton = Button(frameBottom, command=randomize2, text="Randomize")
-    genButton.grid(row=0,column=0)
+    genButton.grid(row=0,column=2)
 
-    getanalyse2 = partial(getanalyse,entryip, entrysm, entrycidr,frameAnalysis)
-    analButton = Button(frameBottom, command=getanalyse2, text="Analyze")
-    analButton.grid(row=0,column=1)
+    gettest2 = partial(gettest,entryip, entrysm, entrycidr,frameTest,frameAnalysis)
+    testButton = Button(frameBottom, command=gettest2, text="Test")
+    testButton.grid(row=0,column=3)
 
+    getcheck2 = partial(getcheck,entryip,entrysm,entrycidr,frameAnalysis,frameTest)
+    checkButton = Button(frameBottom, command=getcheck2, text="Check")
+    checkButton.grid(row=0,column=4)
+
+    getanalyse2 = partial(getanalyse,entryip, entrysm, entrycidr,frameAnalysis,frameTest)
+    analButton = Button(frameBottom, command=getanalyse2, text="Solve")
+    analButton.grid(row=0,column=5)
+    
     frameBottom.pack()
     
     window.mainloop()

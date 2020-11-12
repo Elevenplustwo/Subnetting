@@ -241,7 +241,7 @@ def analyzeGUI(ip, subnetzmaske, cidr):
     #Wir addieren 1 da wir bei den Subnetzen bei 1 zu zählen beginnen und nicht wie bei Binärzahlen bei 0.
     if noSubnet==False: 
         returnlist.append("Nummer des Subnetzes: ")
-        returnlist.append(str(bin2dec(int(Subnetz)) + 1) + "-tes Subnetz")
+        returnlist.append(str(bin2dec(int(Subnetz)) + 1))
     if noSubnet==True: 
         returnlist.append("Nummer des Subnetzes ")
         returnlist.append("Gibt keine Subnetze.")
